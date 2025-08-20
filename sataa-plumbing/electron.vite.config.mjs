@@ -9,6 +9,9 @@ export default defineConfig({
   preload: {
     plugins: [externalizeDepsPlugin()]
   },
+  css: {
+    postcss: './postcss.config.js',
+  },
   renderer: {
     base: './',
     resolve: {

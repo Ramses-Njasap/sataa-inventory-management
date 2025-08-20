@@ -7,6 +7,7 @@ import {
   BarElement,
   LineElement,
   PointElement,
+  LineController, // Add this
   Title,
   Tooltip,
   Legend,
@@ -20,6 +21,7 @@ ChartJS.register(
   BarElement,
   LineElement,
   PointElement,
+  LineController, // Add this
   Title,
   Tooltip,
   Legend,
@@ -275,17 +277,6 @@ function Welcome() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {topProducts.map(product => (
               <div key={product.id} className="bg-slate-50 p-3 rounded-lg border border-slate-200 hover:shadow-sm transition-shadow duration-200">
-                {/* {product.image_path ? (
-                  <img 
-                    src={product.image_path} 
-                    alt={product.name}
-                    className="w-full h-24 object-cover rounded-lg mb-2"
-                  />
-                ) : (
-                  <div className="w-full h-24 bg-slate-100 rounded-lg mb-2 flex items-center justify-center">
-                    <span className="text-slate-400">No Image</span>
-                  </div>
-                )} */}
                 <h4 className="text-slate-900 font-medium truncate">{product.name}</h4>
                 <p className="text-slate-500 text-sm">Sold: {product.total_quantity}</p>
                 <p className="text-slate-500 text-sm">Revenue: {product.total_revenue.toFixed(2)} XAF</p>
