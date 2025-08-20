@@ -1,9 +1,12 @@
 {
   "name": "sataa-plumbing",
   "version": "1.0.0",
-  "description": "An Electron application with React",
+  "description": "Sataa Plumbing is a comprehensive plumbing management application designed to streamline operations, enhance customer service, and improve overall efficiency for plumbing businesses.",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": {
+    "name": "Ramses Njasap",
+    "email": "ramsesnjasap11@gmail.com"
+  },
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
