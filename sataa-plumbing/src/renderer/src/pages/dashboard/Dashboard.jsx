@@ -1,32 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 
 function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Fetch user role
+    window.api.getUserRole().then(role => {
+      setUserRole(role);
+      if (!['admin', 'manager', 'secretary'].includes(role)) {
+        navigate('/products');
+      }
+    }).catch(err => {
+      navigate('/login');
+    });
+  }, [navigate]);
+
   const toggleSidebar = () => {
-    console.log('Toggling sidebar, current state:', isSidebarOpen); // Debug log
-    setIsSidebarOpen((prev) => {
-      console.log('New sidebar state:', !prev); // Debug log
+    setIsSidebarOpen(prev => {
       return !prev;
     });
   };
 
   const closeSidebar = () => {
-    console.log('Closing sidebar'); // Debug log
     setIsSidebarOpen(false);
   };
 
   const handleLogout = async () => {
     try {
-      console.log('Initiating logout'); // Debug log
       await window.api.logout();
       navigate('/login');
     } catch (error) {
-      console.error('Error logging out:', error);
     }
   };
+
+  // Define restricted pages by role
+  const restrictedPages = {
+    secretary: ['accounts', 'sales', 'products'],
+    manager: ['accounts', 'sales'],
+    admin: [],
+  };
+
+  // Hide sidebar toggle for secretary
+  const canToggleSidebar = ['admin', 'manager'].includes(userRole);
+
+  if (userRole === null) {
+    return <div className="p-6">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -40,6 +62,15 @@ function Dashboard() {
           <h3 className="text-xl font-semibold text-slate-900 mb-6">Dashboard</h3>
           <ul className="space-y-2">
             <li>
+              <Link
+                to="/products"
+                className="block p-2 rounded-md text-sm font-medium text-indigo-600 hover:bg-slate-200 hover:text-indigo-500 transition-all duration-200"
+                onClick={closeSidebar}
+              >
+                Return To Sales Point
+              </Link>
+            </li>
+            <li style={{ display: restrictedPages[userRole]?.includes('accounts') ? 'none' : 'block' }}>
               <Link
                 to="/dashboard/accounts"
                 className="block p-2 rounded-md text-sm font-medium text-indigo-600 hover:bg-slate-200 hover:text-indigo-500 transition-all duration-200"
@@ -75,7 +106,7 @@ function Dashboard() {
                 Products
               </Link>
             </li>
-            <li>
+            <li style={{ display: restrictedPages[userRole]?.includes('sales') ? 'none' : 'block' }}>
               <Link
                 to="/dashboard/sales"
                 className="block p-2 rounded-md text-sm font-medium text-indigo-600 hover:bg-slate-200 hover:text-indigo-500 transition-all duration-200"
@@ -83,6 +114,17 @@ function Dashboard() {
               >
                 Sales
               </Link>
+            </li>
+            <li style={{ display: restrictedPages[userRole]?.includes('sales') ? 'none' : 'block' }}>
+              {userRole === "admin" && (
+                <Link
+                  to="/dashboard/history"
+                  className="block p-2 rounded-md text-sm font-medium text-indigo-600 hover:bg-slate-200 hover:text-indigo-500 transition-all duration-200"
+                  onClick={closeSidebar}
+                >
+                  History
+                </Link>
+              )}
             </li>
             <li>
               <button
@@ -106,12 +148,12 @@ function Dashboard() {
 
       {/* Main Content */}
       <div className="flex-1">
-        {/* Header with Hamburger Toggle */}
         <header className="bg-slate-100 p-4 flex items-center border-b border-slate-300 shadow-sm">
           <button
             onClick={toggleSidebar}
             className="w-8 h-8 flex flex-col justify-center items-center mr-4"
             aria-label="Toggle sidebar"
+            style={{ display: canToggleSidebar ? 'flex' : 'none' }}
           >
             <span
               className={`w-6 h-0.5 bg-slate-900 mb-1.5 transition-all duration-300 ${
@@ -129,12 +171,19 @@ function Dashboard() {
               }`}
             ></span>
           </button>
-          <Link to='/dashboard' className="text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline">
-            <h1 className="text-slate-900 text-xl font-semibold">Dashboard</h1>
+          <Link to="/dashboard" className="text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline">
+            <h1 className="text-slate-900 text-xl font-semibold">
+              {userRole === "secretary" ? (
+                <Link to="/products">
+                  Return To Sales Point
+                </Link>
+              ) : (
+                'Dashboard'
+              )
+            }
+            </h1>
           </Link>
         </header>
-
-        {/* Content Outlet */}
         <main className="p-6">
           <Outlet />
         </main>

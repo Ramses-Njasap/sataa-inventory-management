@@ -12,7 +12,7 @@ function Login() {
     e.preventDefault();
     try {
       const userData = await window.api.login({ username, password, role });
-      if (userData.role === 'salesperson' || userData.role === 'secretary') {
+      if (userData.role === 'salesperson') {
         navigate('/products');
       } else {
         navigate('/dashboard');

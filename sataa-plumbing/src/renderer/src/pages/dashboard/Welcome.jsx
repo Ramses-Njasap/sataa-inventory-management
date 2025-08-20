@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
+import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,6 +36,17 @@ function Welcome() {
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await window.api.logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      setError('Failed to log out. Please try again.');
+    }
+  };
 
   // Fetch data based on time range
   useEffect(() => {
@@ -181,113 +193,124 @@ function Welcome() {
   }
 
   return (
-    <div className="bg-slate-50 p-6 rounded-xl shadow-sm border border-slate-300">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-slate-900 text-lg font-semibold">Dashboard Overview</h2>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 bg-slate-100 text-slate-900 rounded-md border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
-          >
-            <option value="today">Today</option>
-            <option value="3days">Last 3 Days</option>
-            <option value="week">Last Week</option>
-            <option value="2weeks">Last 2 Weeks</option>
-            <option value="month">Last Month</option>
-          </select>
+    <>
+      <div className="bg-slate-50 p-6 rounded-xl shadow-sm border border-slate-300">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <h2 className="text-slate-900 text-lg font-semibold">Dashboard Overview</h2>
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="px-4 py-2 bg-slate-100 text-slate-900 rounded-md border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
+            >
+              <option value="today">Today</option>
+              <option value="3days">Last 3 Days</option>
+              <option value="week">Last Week</option>
+              <option value="2weeks">Last 2 Weeks</option>
+              <option value="month">Last Month</option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
-          <h3 className="text-slate-500 text-sm font-medium">Total Sales</h3>
-          <p className="text-slate-900 text-2xl font-bold">{stats?.total_sales || 0}</p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
+            <h3 className="text-slate-500 text-sm font-medium">Total Sales</h3>
+            <p className="text-slate-900 text-2xl font-bold">{stats?.total_sales || 0}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
+            <h3 className="text-slate-500 text-sm font-medium">Total Revenue</h3>
+            <p className="text-slate-900 text-2xl font-bold">{(stats?.total_revenue || 0).toFixed(2)} XAF</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
+            <h3 className="text-slate-500 text-sm font-medium">Total Profit</h3>
+            <p className="text-slate-900 text-2xl font-bold">{(stats?.total_profit || 0).toFixed(2)} XAF</p>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
-          <h3 className="text-slate-500 text-sm font-medium">Total Revenue</h3>
-          <p className="text-slate-900 text-2xl font-bold">{(stats?.total_revenue || 0).toFixed(2)} XAF</p>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
-          <h3 className="text-slate-500 text-sm font-medium">Total Profit</h3>
-          <p className="text-slate-900 text-2xl font-bold">{(stats?.total_profit || 0).toFixed(2)} XAF</p>
-        </div>
-      </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
-          <Bar data={salesTrendChart} options={chartOptions} />
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
-          <Bar 
-            data={topProductsChart} 
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  position: 'top',
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
+            <Bar data={salesTrendChart} options={chartOptions} />
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
+            <Bar 
+              data={topProductsChart} 
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                  title: {
+                    display: true,
+                    text: 'Top Selling Products',
+                  },
                 },
-                title: {
-                  display: true,
-                  text: 'Top Selling Products',
-                },
-              },
-            }} 
-          />
+              }} 
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Recent Sales */}
-      <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200 mb-6">
-        <h3 className="text-slate-900 text-sm font-semibold mb-4">Recent Sales</h3>
-        {recentSales.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-slate-900 text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-100">
-                  <th className="p-3 text-sm font-medium">ID</th>
-                  <th className="p-3 text-sm font-medium">Customer</th>
-                  <th className="p-3 text-sm font-medium">Amount</th>
-                  <th className="p-3 text-sm font-medium">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentSales.map(sale => (
-                  <tr key={sale.id} className="border-t border-slate-300 hover:bg-slate-100 transition-colors duration-150">
-                    <td className="p-3">#{sale.id}</td>
-                    <td className="p-3">{sale.customer_name || 'No Customer'}</td>
-                    <td className="p-3">{sale.total_price.toFixed(2)} XAF</td>
-                    <td className="p-3">{new Date(sale.created_at).toLocaleString()}</td>
+        {/* Recent Sales */}
+        <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200 mb-6">
+          <h3 className="text-slate-900 text-sm font-semibold mb-4">Recent Sales</h3>
+          {recentSales.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-slate-900 text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-100">
+                    <th className="p-3 text-sm font-medium">ID</th>
+                    <th className="p-3 text-sm font-medium">Customer</th>
+                    <th className="p-3 text-sm font-medium">Amount</th>
+                    <th className="p-3 text-sm font-medium">Date</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-slate-600">No recent sales found</p>
-        )}
-      </div>
+                </thead>
+                <tbody>
+                  {recentSales.map(sale => (
+                    <tr key={sale.id} className="border-t border-slate-300 hover:bg-slate-100 transition-colors duration-150">
+                      <td className="p-3">#{sale.id}</td>
+                      <td className="p-3">{sale.customer_name || 'No Customer'}</td>
+                      <td className="p-3">{sale.total_price.toFixed(2)} XAF</td>
+                      <td className="p-3">{new Date(sale.created_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-slate-600">No recent sales found</p>
+          )}
+        </div>
 
-      {/* Top Products */}
-      <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
-        <h3 className="text-slate-900 text-sm font-semibold mb-4">Top Products</h3>
-        {topProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {topProducts.map(product => (
-              <div key={product.id} className="bg-slate-50 p-3 rounded-lg border border-slate-200 hover:shadow-sm transition-shadow duration-200">
-                <h4 className="text-slate-900 font-medium truncate">{product.name}</h4>
-                <p className="text-slate-500 text-sm">Sold: {product.total_quantity}</p>
-                <p className="text-slate-500 text-sm">Revenue: {product.total_revenue.toFixed(2)} XAF</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-slate-600">No top products found</p>
-        )}
+        {/* Top Products */}
+        <div className="bg-white p-4 rounded-lg shadow-xs border border-slate-200">
+          <h3 className="text-slate-900 text-sm font-semibold mb-4">Top Products</h3>
+          {topProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {topProducts.map(product => (
+                <div key={product.id} className="bg-slate-50 p-3 rounded-lg border border-slate-200 hover:shadow-sm transition-shadow duration-200">
+                  <h4 className="text-slate-900 font-medium truncate">{product.name}</h4>
+                  <p className="text-slate-500 text-sm">Sold: {product.total_quantity}</p>
+                  <p className="text-slate-500 text-sm">Revenue: {product.total_revenue.toFixed(2)} XAF</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-slate-600">No top products found</p>
+          )}
+        </div>
       </div>
-    </div>
+      <button
+        onClick={() => handleLogout()}
+        className="px-6 py-3 mt-5 bg-gradient-to-r from-red-500 to-red-600 text-white font-medium rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-md flex items-center gap-2"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+        </svg>
+        Logout
+      </button>
+    </>
   );
 }
 

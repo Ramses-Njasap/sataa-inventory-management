@@ -29,6 +29,27 @@ function ProductDetail() {
   const weightUnits = ['kg', 'g', 'lb', 'oz'];
   const allowedNegativeFields = ['price_per_unit_bought', 'price_per_unit_sold', 'total_price_bought'];
 
+
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+
+    const checkAuth = async () => {
+      try {
+        const authStatus = await window.api.getAuthStatus();
+        const role = await window.api.getUserRole();
+        setIsAuthenticated(authStatus);
+        setIsAdmin(role === 'admin');
+        setLoading(false);
+      } catch (error) {
+        setIsAuthenticated(false);
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
   // Load default image path on component mount
   // useEffect(() => {
   //   const loadDefaultImage = async () => {
@@ -221,7 +242,25 @@ function ProductDetail() {
   };
 
   if (loading && !product) {
-    return <div className="text-slate-900 p-6">Loading product details...</div>;
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+          <p className="text-slate-900">Checking authentication and loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+          <p className="text-slate-900">User not authenticated...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!product) {
@@ -259,6 +298,7 @@ function ProductDetail() {
             type="text"
             name="name"
             value={formData.name}
+            disabled={!isAdmin}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
             required
@@ -271,6 +311,7 @@ function ProductDetail() {
           <select
             name="category_id"
             value={formData.category_id}
+            disabled={!isAdmin}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
             required
@@ -290,6 +331,7 @@ function ProductDetail() {
           <input
             type="text"
             name="size"
+            disabled={!isAdmin}
             value={formData.size}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -303,6 +345,7 @@ function ProductDetail() {
             <input
               type="color"
               name="color"
+              disabled={!isAdmin}
               value={formData.color}
               onChange={handleColorChange}
               className="h-10 w-10 rounded cursor-pointer border border-slate-300"
@@ -310,6 +353,7 @@ function ProductDetail() {
             <input
               type="text"
               name="color_text"
+              disabled={!isAdmin}
               value={formData.color}
               onChange={handleColorChange}
               className="flex-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -324,6 +368,7 @@ function ProductDetail() {
           <input
             type="number"
             name="price_per_unit_bought"
+            disabled={!isAdmin}
             value={formData.price_per_unit_bought}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -337,6 +382,7 @@ function ProductDetail() {
           <input
             type="number"
             name="price_per_unit_sold"
+            disabled={!isAdmin}
             value={formData.price_per_unit_sold}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -350,6 +396,7 @@ function ProductDetail() {
           <input
             type="number"
             name="quantity_bought"
+            disabled={!isAdmin}
             value={formData.quantity_bought}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -364,6 +411,7 @@ function ProductDetail() {
           <input
             type="number"
             name="quantity_sold"
+            disabled={!isAdmin}
             value={formData.quantity_sold}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -380,6 +428,7 @@ function ProductDetail() {
             <input
               type="number"
               name="weight"
+              disabled={!isAdmin}
               value={formData.weight}
               onChange={handleInputChange}
               className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -391,6 +440,7 @@ function ProductDetail() {
             <select
               name="weight_unit"
               value={formData.weight_unit}
+              disabled={!isAdmin}
               onChange={handleInputChange}
               className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
             >
@@ -407,6 +457,7 @@ function ProductDetail() {
           <input
             type="number"
             name="total_price_bought"
+            disabled={!isAdmin}
             value={formData.total_price_bought}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -441,23 +492,25 @@ function ProductDetail() {
         </div> */}
         
         {/* Action Buttons */}
-        <div className="flex space-x-4 pt-4">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-teal-500 text-slate-50 rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 disabled:opacity-50 text-sm font-medium"
-            disabled={loading}
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="px-4 py-2 bg-rose-500 text-slate-50 rounded-md hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 disabled:opacity-50 text-sm font-medium"
-            disabled={loading}
-          >
-            Delete
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex space-x-4 pt-4">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-teal-500 text-slate-50 rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 disabled:opacity-50 text-sm font-medium"
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="px-4 py-2 bg-rose-500 text-slate-50 rounded-md hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 disabled:opacity-50 text-sm font-medium"
+              disabled={loading}
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

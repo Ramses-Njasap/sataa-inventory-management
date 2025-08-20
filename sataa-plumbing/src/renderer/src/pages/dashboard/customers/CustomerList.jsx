@@ -16,6 +16,26 @@ function CustomerList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSale, setSelectedSale] = useState(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    const checkAuth = async () => {
+      try {
+        const authStatus = await window.api.getAuthStatus();
+        const role = await window.api.getUserRole();
+        setIsAuthenticated(authStatus);
+        setIsAdmin(role === 'admin');
+        setLoading(false);
+      } catch (error) {
+        setIsAuthenticated(false);
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -27,6 +47,7 @@ function CustomerList() {
         setError('Failed to load customers: ' + err.message);
       }
     };
+
     fetchCustomers();
   }, []);
 
@@ -95,6 +116,28 @@ function CustomerList() {
     await window.api.printReceipt(selectedSale.id, dataUrl);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+          <p className="text-slate-900">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+          <p className="text-slate-900">User not authenticated...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-slate-50 p-6 rounded-xl shadow-sm border border-slate-300">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
@@ -112,15 +155,17 @@ function CustomerList() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <Link
-            to="/dashboard/customers/new"
-            className="px-4 py-2 bg-teal-500 text-slate-50 rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 text-sm font-medium flex items-center justify-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Add Customer
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/dashboard/customers/new"
+              className="px-4 py-2 bg-teal-500 text-slate-50 rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 text-sm font-medium flex items-center justify-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Customer
+            </Link>
+          )}
         </div>
       </div>
       
@@ -160,15 +205,17 @@ function CustomerList() {
                         </svg>
                         View Sales
                       </button>
-                      <Link 
-                        to={`/dashboard/customers/${customer.id}`}
-                        className="text-teal-500 hover:text-teal-600 transition-colors duration-200 flex items-center text-sm font-medium"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit
-                      </Link>
+                      {isAdmin && (
+                        <Link 
+                          to={`/dashboard/customers/${customer.id}`}
+                          className="text-teal-500 hover:text-teal-600 transition-colors duration-200 flex items-center text-sm font-medium"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Edit
+                        </Link>
+                      )}
                     </div>
                   </td>
                 </tr>

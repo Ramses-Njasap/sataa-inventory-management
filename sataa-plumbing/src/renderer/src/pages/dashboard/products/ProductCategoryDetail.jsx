@@ -15,6 +15,26 @@ function ProductCategoryDetail() {
   const [imagePreview, setImagePreview] = useState('');
   const [defaultImage, setDefaultImage] = useState('');
 
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+
+    const checkAuth = async () => {
+      try {
+        const authStatus = await window.api.getAuthStatus();
+        const role = await window.api.getUserRole();
+        setIsAuthenticated(authStatus);
+        setIsAdmin(role === 'admin');
+        setLoading(false);
+      } catch (error) {
+        setIsAuthenticated(false);
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
 //   useEffect(() => {
 //     const loadDefaultImage = async () => {
 //       try {
@@ -125,8 +145,26 @@ function ProductCategoryDetail() {
   };
 
   if (loading && !category) {
-    return <div className="text-slate-900 p-6">Loading category details...</div>;
-  }
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+            <p className="text-slate-900">Checking authentication and loading category detail...</p>
+          </div>
+        </div>
+      );
+    }
+  
+    if (!isAuthenticated) {
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+            <p className="text-slate-900">User not authenticated...</p>
+          </div>
+        </div>
+      );
+    }
 
   if (!category) {
     return (
@@ -162,6 +200,7 @@ function ProductCategoryDetail() {
           <input
             type="text"
             name="name"
+            disabled={!isAdmin}
             value={formData.name}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -174,6 +213,7 @@ function ProductCategoryDetail() {
           <label className="text-slate-600 text-sm font-medium">Description</label>
           <textarea
             name="description"
+            disabled={!isAdmin}
             value={formData.description}
             onChange={handleInputChange}
             className="w-full mt-1 p-2 rounded-md bg-slate-100 text-slate-900 border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 focus:outline-none transition-all duration-200"
@@ -208,23 +248,25 @@ function ProductCategoryDetail() {
         </div> */}
         
         {/* Action Buttons */}
-        <div className="flex space-x-4 pt-4">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-teal-500 text-slate-50 rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 disabled:opacity-50 text-sm font-medium"
-            disabled={loading}
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="px-4 py-2 bg-rose-500 text-slate-50 rounded-md hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 disabled:opacity-50 text-sm font-medium"
-            disabled={loading}
-          >
-            Delete
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex space-x-4 pt-4">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-teal-500 text-slate-50 rounded-md hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 disabled:opacity-50 text-sm font-medium"
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="px-4 py-2 bg-rose-500 text-slate-50 rounded-md hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-opacity-50 active:scale-95 transition-all duration-200 disabled:opacity-50 text-sm font-medium"
+              disabled={loading}
+            >
+              Delete
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

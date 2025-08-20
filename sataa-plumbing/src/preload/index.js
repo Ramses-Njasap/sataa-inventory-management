@@ -7,6 +7,7 @@ const api = {
   getAuthStatus: () => ipcRenderer.invoke('get-auth-status'),
   login: (credentials) => ipcRenderer.invoke('login', credentials),
   logout: () => ipcRenderer.invoke('logout'),
+  getUserRole: () => ipcRenderer.invoke('get-user-role'),
 
   // ==================== ACCOUNT MANAGEMENT ====================
   getAccounts: () => ipcRenderer.invoke('get-accounts'),
@@ -65,11 +66,17 @@ const api = {
   getSaleWithItems: (saleId) => ipcRenderer.invoke('get-sale-with-items', saleId),
   updateSaleAndItems: (saleData) => ipcRenderer.invoke('update-sale-and-items', saleData),
 
-
+  // ==================== Sales Analysis ====================
   getSalesStats: (startDate, endDate) => ipcRenderer.invoke('get-sales-stats', startDate, endDate),
   getRecentSales: (startDate, endDate, limit) => ipcRenderer.invoke('get-recent-sales', startDate, endDate, limit),
   getTopProducts: (startDate, endDate, limit) => ipcRenderer.invoke('get-top-products', startDate, endDate, limit),
   getSalesTrend: (startDate, endDate) => ipcRenderer.invoke('get-sales-trend', startDate, endDate),
+
+  // ==================== User History ====================
+  getUserHistory: (page, pageSize) => ipcRenderer.invoke('get-user-history', page, pageSize),
+  deleteUserHistory: (id) => ipcRenderer.invoke('delete-user-history', id),
+  getUserHistoryById: (id) => ipcRenderer.invoke('get-user-history-by-id', id),
+  bulkDeleteUserHistory: (timeframe) => ipcRenderer.invoke('bulk-delete-user-history', timeframe),
 
   // ==================== UTILITIES ====================
   on: (channel, callback) => {

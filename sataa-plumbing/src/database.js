@@ -75,6 +75,19 @@ const TABLES = {
         FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
     )
+  `,
+  "user_history": `
+    CREATE TABLE IF NOT EXISTS user_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        action VARCHAR(200) NOT NULL,
+        linked_action_id INT,
+        linked_action_table VARCHAR(50) NOT NULL,
+        old_data TEXT,
+        new_data TEXT,
+        account_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    )
   `
 };
 
@@ -145,4 +158,30 @@ function getDb() {
   return db;
 }
 
-export { setupDatabase, getDb };
+async function logUserAction({ action, linked_action_id, linked_action_table, old_data, new_data, account_id }) {
+  return new Promise((resolve, reject) => {
+    const db = getDb();
+    db.run(
+      `INSERT INTO user_history (action, linked_action_id, linked_action_table, old_data, new_data, account_id) VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        action,
+        linked_action_id,
+        linked_action_table,
+        old_data ? old_data : null,
+        new_data ? new_data : null,
+        account_id
+      ],
+      (err) => {
+        if (err) {
+          console.error(`Error logging user action: ${err.message}`);
+          reject(err);
+          return;
+        }
+        console.log(`Logged action: ${action} on table ${linked_action_table} by account ${account_id}`);
+        resolve();
+      }
+    );
+  });
+}
+
+export { setupDatabase, getDb, logUserAction };

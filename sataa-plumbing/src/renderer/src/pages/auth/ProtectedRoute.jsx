@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 
-function ProtectedRoute({ children }) {
-  const [auth, setAuth] = useState(null);
+function ProtectedRoute({ children, requiredRole }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const authStatus = await window.api.getAuthStatus();
-        setAuth(authStatus);
+        const role = await window.api.getUserRole();
+        setIsAuthenticated(authStatus);
+        setUserRole(role);
         setLoading(false);
       } catch (error) {
-        console.error('Error checking auth status:', error);
+        setIsAuthenticated(false);
         setLoading(false);
       }
     };
@@ -30,7 +33,15 @@ function ProtectedRoute({ children }) {
     );
   }
 
-  return auth ? children : <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole && !requiredRole.includes(userRole)) {
+    return <Navigate to={userRole === 'salesperson' ? '/products' : '/dashboard'} replace />;
+  }
+
+  return children;
 }
 
 export default ProtectedRoute;

@@ -11,7 +11,28 @@ function Products() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortOption, setSortOption] = useState('name');
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [isAllowedToViewDashboard, setIsAllowedToViewDashboard] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+
+    const checkAuth = async () => {
+      try {
+        const authStatus = await window.api.getAuthStatus();
+        const role = await window.api.getUserRole();
+        setIsAuthenticated(authStatus);
+        setIsAllowedToViewDashboard(['secretary', 'manager', 'admin'].includes(role));
+        setLoading(false);
+      } catch (error) {
+        setIsAuthenticated(false);
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,6 +109,28 @@ function Products() {
         default: return 0;
       }
     });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+          <p className="text-slate-900">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
+          <p className="text-slate-900">User not authenticated...</p>
+        </div>
+      </div>
+    );
+  }
     
 
   return (
@@ -101,6 +144,17 @@ function Products() {
               <p className="text-slate-600">Manage your product catalog and track inventory levels</p>
             </div>
             <div className='flex flex-row flex-wrap gap-4'>
+              {isAllowedToViewDashboard && (
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-md flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Dashboard
+                </button>
+              )}
               <button
                 onClick={() => setIsSaleModalOpen(true)}
                 className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md flex items-center gap-2"
