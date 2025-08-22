@@ -31,7 +31,6 @@ import UserHistoryDetails from './pages/dashboard/history/UserHistoryDetail';
 
 
 export default function App() {
-  console.log('App component rendered');
   return (
     <Router>
       <Routes>

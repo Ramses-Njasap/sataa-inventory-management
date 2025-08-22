@@ -52,11 +52,10 @@ function Products() {
 
   const handleLogout = async () => {
     try {
-      console.log('Initiating logout'); // Debug log
       await window.api.logout();
       navigate('/login');
     } catch (error) {
-      console.error('Error logging out:', error);
+      setError('Failed to logout: ', error)
     }
   };
 

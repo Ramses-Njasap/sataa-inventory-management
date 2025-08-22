@@ -102,7 +102,6 @@ function Checkout() {
     // restore display
     receiptElement.style.display = prevDisplay;
   } catch (err) {
-    console.error('Failed to generate receipt:', err);
     setError('Failed to generate receipt: ' + err.message);
   }
 };
@@ -114,7 +113,6 @@ function Checkout() {
       const dataUrl = canvas.toDataURL('image/png');
       await window.api.printReceipt(saleData.id, dataUrl);
     } catch (err) {
-      console.error('Printing failed:', err);
       setError('Failed to print receipt: ' + err.message);
     }
   };
@@ -136,7 +134,6 @@ function Checkout() {
         if (receiptRef.current) {
           printReceipt();
         } else {
-          console.error('Receipt content not available for printing');
           setError('Failed to generate receipt for printing');
         }
       }, 100);

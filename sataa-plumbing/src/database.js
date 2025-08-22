@@ -96,17 +96,15 @@ async function setupDatabase() {
     const dbPath = path.join(app.getPath('userData'), DB_NAME);
     db = new verboseSqlite3.Database(dbPath, (err) => {
       if (err) {
-        console.error('Error opening database: ' + err.message);
         reject(err);
         return;
       }
-      console.log('Database connected!');
       db.serialize(() => {
         // Create all tables
         for (const table in TABLES) {
           db.run(TABLES[table], (err) => {
             if (err) {
-              console.error(`Error creating table ${table}:`, err.message);
+              reject(err)
             }
           });
         }
@@ -117,7 +115,6 @@ async function setupDatabase() {
           [],
           (err, row) => {
             if (err) {
-              console.error('Error checking for admin user:', err.message);
               reject(err);
               return;
             }
@@ -132,16 +129,13 @@ async function setupDatabase() {
                 [defaultUsername, hashedPassword, defaultRole],
                 (err) => {
                   if (err) {
-                    console.error('Error creating admin user:', err.message);
                     reject(err);
                     return;
                   }
-                  console.log('Default admin user created: username=admin, password=admin123');
                   resolve(db);
                 }
               );
             } else {
-              console.log('Admin user already exists');
               resolve(db);
             }
           }
@@ -173,11 +167,9 @@ async function logUserAction({ action, linked_action_id, linked_action_table, ol
       ],
       (err) => {
         if (err) {
-          console.error(`Error logging user action: ${err.message}`);
           reject(err);
           return;
         }
-        console.log(`Logged action: ${action} on table ${linked_action_table} by account ${account_id}`);
         resolve();
       }
     );

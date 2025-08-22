@@ -43,7 +43,6 @@ function Welcome() {
       await window.api.logout();
       navigate('/login');
     } catch (error) {
-      console.error('Error logging out:', error);
       setError('Failed to log out. Please try again.');
     }
   };

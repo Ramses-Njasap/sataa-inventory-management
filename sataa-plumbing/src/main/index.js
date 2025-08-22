@@ -51,14 +51,10 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-
   try {
     await setupDatabase(); // Wait for database initialization
     createWindow();
   } catch (err) {
-    console.error('Failed to initialize database:', err);
     app.quit();
   }
 

@@ -124,8 +124,6 @@ function ProductCreate() {
         description: categoryForm.description, 
         image_path: categoryForm.image_path 
       };
-
-      console.log("New Category ID is: ", newCategoryId)
       
       setCategories(prev => [...prev, newCategory]);
       setFormData(prev => ({ ...prev, category_id: String(newCategoryId) }));
